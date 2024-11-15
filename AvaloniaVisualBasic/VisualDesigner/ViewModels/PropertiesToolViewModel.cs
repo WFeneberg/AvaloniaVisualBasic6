@@ -22,7 +22,9 @@ public partial class PropertiesToolViewModel : Tool
     public ObservableCollection<ComponentInstanceViewModel>? ComponentsProxy => currentDocument?.AllComponents;
     public ObservableCollection<PropertyViewModel> Properties { get; } = new();
     public ObservableCollection<BasePropertyViewModel> CategorizedProperties { get; } = new();
-    [Notify] private PropertyViewModel selectedProperty;
+    [Notify] private PropertyViewModel? selectedProperty;
+
+    private PropertyClass? lastSelectedPropertyClass;
 
     public ComponentInstanceViewModel? SelectedComponentProxy
     {
@@ -85,6 +87,8 @@ public partial class PropertiesToolViewModel : Tool
                                     var prop = properties[propertyClass] = new PropertyViewModel(this, propertyClass, component.Instance.GetBoxedPropertyOrDefault(propertyClass));
                                     Properties.Add(prop);
                                 }
+
+                                SelectedProperty = Properties.FirstOrDefault(x => x.PropertyClass == lastSelectedPropertyClass);
                                 foreach (var categoryGroup in component.Instance.BaseClass.Properties.GroupBy(p => p.Category))
                                 {
                                     CategorizedProperties.Add(new PropertyCategoryViewModel(this, categoryGroup.Key));
@@ -113,6 +117,14 @@ public partial class PropertiesToolViewModel : Tool
                 prop.UpdateValueNoRaise(instance.GetBoxedPropertyOrDefault(property));
                 break;
             }
+        }
+    }
+
+    private void OnSelectedPropertyChanged()
+    {
+        if (selectedProperty != null)
+        {
+            lastSelectedPropertyClass = selectedProperty.PropertyClass;
         }
     }
 

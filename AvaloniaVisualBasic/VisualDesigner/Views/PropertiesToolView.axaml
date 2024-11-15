@@ -24,7 +24,9 @@
                     <Border
                         Background="{DynamicResource {x:Static commonControls:SystemColors.ControlBrushKey}}"
                         Grid.Column="1" />
-                    <controls:PropertyBox PropertyClass="{CompiledBinding PropertyClass}" Object="{Binding Value}" Grid.Column="2" />
+                    <controls:PropertyBox PropertyClass="{CompiledBinding PropertyClass}" Object="{Binding Value}" Grid.Column="2"
+                                          GotFocus="PropertyGotFocus"
+                                          />
                 </Grid>
             </Border>
         </DataTemplate>
