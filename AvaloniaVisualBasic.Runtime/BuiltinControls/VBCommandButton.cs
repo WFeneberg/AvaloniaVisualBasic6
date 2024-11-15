@@ -11,5 +11,6 @@ public class VBCommandButton : Button
     {
         AttachedEvents.AttachFocusEvents<VBCommandButton>();
         AttachedEvents.AttachClick<VBCommandButton>();
+        ContentTemplateProperty.OverrideDefaultValue<VBCommandButton>(AccessTextDataTemplate.Access);
     }
 }

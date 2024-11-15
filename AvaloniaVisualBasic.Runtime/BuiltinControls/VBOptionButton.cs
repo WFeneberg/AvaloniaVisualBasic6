@@ -56,5 +56,6 @@ public class VBOptionButton : RadioButton
                 _ => throw new ArgumentOutOfRangeException()
             };
         });
+        ContentTemplateProperty.OverrideDefaultValue<VBOptionButton>(AccessTextDataTemplate.Access);
     }
 }

@@ -55,5 +55,6 @@ public class VBCheckBox : CheckBox
                 _ => throw new ArgumentOutOfRangeException()
             };
         });
+        ContentTemplateProperty.OverrideDefaultValue<VBCheckBox>(AccessTextDataTemplate.Access);
     }
 }
