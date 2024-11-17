@@ -108,8 +108,8 @@ public class VBShape : Control
                 {
                     StrokeThickness = 1,
                     Stroke = FillColor.ToBrush(),
-                    StartPoint = new Point(0, 0),
-                    EndPoint = new Point(8, 0)
+                    StartPoint = new Point(0, 7),
+                    EndPoint = new Point(8, 7)
                 }
             ];
         }
@@ -121,8 +121,8 @@ public class VBShape : Control
                 {
                     StrokeThickness = 1,
                     Stroke = FillColor.ToBrush(),
-                    StartPoint = new Point(0, 0),
-                    EndPoint = new Point(0, 8)
+                    StartPoint = new Point(7, 0),
+                    EndPoint = new Point(7, 8)
                 }
             ];
         }
@@ -196,6 +196,7 @@ public class VBShape : Control
         if (visualBrush != null)
         {
             var panel = new Panel();
+            RenderOptions.SetEdgeMode(panel, EdgeMode.Aliased);
             panel.Children.AddRange(visualBrush);
             fillBrush = new VisualBrush(panel)
             {
@@ -228,6 +229,7 @@ public class VBShape : Control
                 context.DrawEllipse(fillBrush, borderPen, rect);
                 break;
             case ShapeTypes.RoundedRectangle:
+            case ShapeTypes.RoundedSquare:
                 if (BackStyle == BackStyles.Opaque)
                     context.DrawRectangle(BackColor.ToBrush(), null, rect, width * 0.01, height * 0.01);
                 context.DrawRectangle(fillBrush, borderPen, rect, width * 0.01, height * 0.01);
