@@ -89,6 +89,7 @@ public static class AvaloniaInteroperability
         Register<Control, double>(VBProperties.HeightProperty, Layoutable.HeightProperty);
         Register<Control, bool>(VBProperties.VisibleProperty, Visual.IsVisibleProperty);
         Register<Control, bool>(VBProperties.EnabledProperty, InputElement.IsEnabledProperty);
+        Register<Control, object?>(VBProperties.TagProperty, Control.TagProperty);
         Register<TemplatedControl, VBColor, VBColor?>(VBProperties.BackColorProperty, AttachedProperties.BackColorProperty, x => x, x=> x ?? default);
         Register<TemplatedControl, VBColor, VBColor?>(VBProperties.ForeColorProperty, AttachedProperties.ForeColorProperty, x => x, x=> x ?? default);
         Register<TemplatedControl, VBFont, VBFont?>(VBProperties.FontProperty, AttachedProperties.FontProperty, x => x, x=> x ?? default);

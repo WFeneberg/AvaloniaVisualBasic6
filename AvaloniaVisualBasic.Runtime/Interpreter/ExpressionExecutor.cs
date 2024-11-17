@@ -242,7 +242,7 @@ public partial class ExpressionExecutor : VB6Visitor<Task<object?>>
 
                 var memberIdentifier = membersCall.iCS_S_MemberCall()[0].GetText().TrimStart('.') ?? throw new VBRunTimeException(icsContext, VBStandardError.ObjectRequired, "Null member name");
 
-                if (variable.Type is not Vb6Value.ValueType.Control ||
+                if (variable.Type != Vb6Value.ValueType.Control ||
                     variable.Value is not Control control)
                     throw new VBMethodOrDataMemberNotFoundException(memberIdentifier, variable.Type);
 
@@ -277,6 +277,19 @@ public partial class ExpressionExecutor : VB6Visitor<Task<object?>>
 
             var name = procOrArrayCall.ambiguousIdentifier().GetText();
             var args = await EvaluateCallArgs(procOrArrayCall.argsCall(0));
+            if (interpreter.ExecutionContext.TryGetVariable(env, name, out var variable))
+            {
+                if (!variable.Type.IsArray || variable.Value is not VBArray array)
+                    throw new VBCompileErrorException("Array expected");
+                try
+                {
+                    return array.GetValue(AsType<int>(args));
+                }
+                catch (IndexOutOfRangeException _)
+                {
+                    throw new VBRunTimeException(procOrArrayCall, VBStandardError.SubscriptOutOfRange);
+                }
+            }
             if (await EvaluateFunction(name, args) is { } builtInResult)
                 return builtInResult;
 

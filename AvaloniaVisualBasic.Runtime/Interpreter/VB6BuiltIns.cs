@@ -741,6 +741,8 @@ public class VB6BuiltIns
             "mid" => (Vb6Value?)Mid(args),
             "ucase" => UCase(args),
             "lcase" => LCase(args),
+            "lbound" => LBound(args),
+            "ubound" => UBound(args),
             "msgbox" => await MsgBox(args),
             "inputbox" => await InputBox(args),
             _ => (Vb6Value?)null
@@ -824,6 +826,26 @@ public class VB6BuiltIns
         if (args[0].Type != Vb6Value.ValueType.String)
             throw new Exception("Type mismatch, string expected");
         return ((string)args[0].Value!).ToLower();
+    }
+
+    private static Vb6Value LBound(List<Vb6Value> args)
+    {
+        if (args.Count < 1 || args.Count > 2)
+            throw new Exception("Error: LBound takes one or two args");
+        if (args[0].Value is not VBArray array)
+            throw new Exception("Error: Array expected");
+        int dimension = args.Count >= 2 ? (int)args[1].Value! : 1;
+        return new Vb6Value(array.LowerBound(dimension));
+    }
+
+    private static Vb6Value UBound(List<Vb6Value> args)
+    {
+        if (args.Count < 1 || args.Count > 2)
+            throw new Exception("Error: LBound takes one or two args");
+        if (args[0].Value is not VBArray array)
+            throw new Exception("Error: Array expected");
+        int dimension = args.Count >= 2 ? (int)args[1].Value! : 1;
+        return new Vb6Value(array.UpperBound(dimension));
     }
 
     private static Vb6Value Mid(List<Vb6Value> args)

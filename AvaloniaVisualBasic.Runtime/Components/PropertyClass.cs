@@ -113,6 +113,11 @@ public abstract class PropertyClass
             o = default;
             return false;
         }
+        else if (PropertyType == typeof(object)) // i.e. Tag
+        {
+            o = value;
+            return true;
+        }
         throw new NotImplementedException($"Add case for propertyType '{PropertyType.FullName}'.");
     }
 }

@@ -22,6 +22,8 @@ public partial class BasicInterpreter : IAntlrErrorListener<IToken>, IAntlrError
     private readonly string code;
     private PrePass prepass;
 
+    public PrePass PrePass => prepass;
+
     public BasicInterpreter(IBasicStandardLibrary stdLib,
         ModuleExecutionContext executionContext,
         ExecutionEnvironment rootEnv,

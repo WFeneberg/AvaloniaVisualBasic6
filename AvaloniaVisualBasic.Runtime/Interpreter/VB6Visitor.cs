@@ -1,10 +1,23 @@
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AvaloniaVisualBasic.Runtime.Interpreter;
 
 public abstract class VB6Visitor<T> : VB6BaseVisitor<T>
 {
+    public T AsType<T>(Vb6Value value)
+    {
+        if (!TryUnpack(value, out T val))
+            throw new VBCompileErrorException("Type mismatch");
+        return val;
+    }
+
+    public List<T> AsType<T>(IReadOnlyList<Vb6Value> indexes)
+    {
+        return indexes.Select(AsType<T>).ToList();
+    }
+
     public bool TryUnpack<T>(Vb6Value val, out T tout)
     {
         tout = default!;
@@ -14,6 +27,14 @@ public abstract class VB6Visitor<T> : VB6BaseVisitor<T>
             {
                 tout = (T)(object)(int)val.Value!;
                 return true;
+            }
+            if (val.Type == Vb6Value.ValueType.String)
+            {
+                if (int.TryParse((string?)val.Value ?? "", out var asInt))
+                {
+                    tout = (T)(object)asInt;
+                    return true;
+                }
             }
             return false;
         }
@@ -90,5 +111,36 @@ public abstract class VB6Visitor<T> : VB6BaseVisitor<T>
                 throw new Exception("Type mismatch");
         }
         throw new Exception("Type mismatch");
+    }
+
+    public Vb6Value.ValueType ExtractType(VB6Parser.AsTypeClauseContext? asTypeClause, bool isArray)
+    {
+        Vb6Value.ValueType type = Vb6Value.ValueType.EmptyVariant;
+        if (asTypeClause != null)
+        {
+            if (asTypeClause.NEW() != null)
+                throw new NotImplementedException("New as type not implemented");
+            if (asTypeClause.fieldLength() != null)
+                throw new NotImplementedException("fieldLength as type not implemented");
+            if (asTypeClause.type().complexType() != null)
+                throw new NotImplementedException("complex type as type not implemented");
+            if (asTypeClause.type().baseType().STRING() != null)
+                type = Vb6Value.ValueType.String;
+            else if (asTypeClause.type().baseType().INTEGER() != null)
+                type = Vb6Value.ValueType.Integer;
+            else if (asTypeClause.type().baseType().SINGLE() != null)
+                type = Vb6Value.ValueType.Single;
+            else if (asTypeClause.type().baseType().DOUBLE() != null)
+                type = Vb6Value.ValueType.Double;
+            else if (asTypeClause.type().baseType().BOOLEAN() != null)
+                type = Vb6Value.ValueType.Boolean;
+            else
+                throw new NotImplementedException("base type " + asTypeClause.type().baseType().GetChild(0) + " not implemented");
+        }
+
+        if (isArray)
+            type = new Vb6Value.ValueType(type, true);
+
+        return type;
     }
 }

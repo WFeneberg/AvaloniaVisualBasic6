@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Antlr4.Runtime.Tree;
 using Avalonia.Controls;
@@ -399,7 +400,7 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
 
             var memberIdentifier = membersCall.iCS_S_MemberCall()[0].GetText().TrimStart('.') ?? throw new VBRunTimeException(context, VBStandardError.ObjectRequired, "Null member name");
 
-            if (variable.Type is not Vb6Value.ValueType.Control ||
+            if (variable.Type != Vb6Value.ValueType.Control ||
                 variable.Value is not Control control)
                 throw new VBRunTimeException(context, VBStandardError.MethodOrDataMemberNotFound, $"Variable {identifier} type {variable.Type} doesn't have member {memberIdentifier}");
 
@@ -412,6 +413,38 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
             }
 
             throw new VBRunTimeException(context, VBStandardError.MethodOrDataMemberNotFound, $"Variable {identifier} type {variable.Type} doesn't have member {memberIdentifier}");
+        }
+        if (context.implicitCallStmt_InStmt().iCS_S_ProcedureOrArrayCall() is { } procedureOrArrayCall)
+        {
+            if (procedureOrArrayCall.baseType() != null||
+                procedureOrArrayCall.iCS_S_NestedProcedureCall() != null ||
+                procedureOrArrayCall.typeHint() != null ||
+                procedureOrArrayCall.dictionaryCallStmt() != null)
+                throw new NotImplementedException();
+
+            if (procedureOrArrayCall.argsCall().Length != 1)
+                throw new NotImplementedException();
+
+            var identifier = procedureOrArrayCall.ambiguousIdentifier().GetText() ?? throw new VBRunTimeException(context, VBStandardError.ObjectRequired, "Null variable name");
+            var indexes = await expressionExecutor.EvaluateCallArgs(procedureOrArrayCall.argsCall(0));
+            var indexesAsInt = AsType<int>(indexes);
+
+            if (!interpreter.ExecutionContext.TryGetVariable(currentEnv, identifier, out var array))
+                throw new VBRunTimeException(context, VBStandardError.ObjectRequired, "Variable " + identifier + " is not declared");
+
+            if (!array.Type.IsArray || array.Value is not VBArray arr)
+                throw new VBCompileErrorException("Expected array");
+
+            try
+            {
+                arr.SetValue(indexesAsInt, value);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new VBRunTimeException(procedureOrArrayCall, VBStandardError.SubscriptOutOfRange);
+            }
+
+            return ControlFlow.Nothing;
         }
         else
         {
@@ -504,11 +537,6 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
     public override async Task<ControlFlow> VisitRandomizeStmt(VB6Parser.RandomizeStmtContext context)
     {
         throw new NotImplementedException("Randomize not implemented");
-    }
-
-    public override async Task<ControlFlow> VisitRedimStmt(VB6Parser.RedimStmtContext context)
-    {
-        throw new NotImplementedException("Redim not implemented");
     }
 
     public override async Task<ControlFlow> VisitResetStmt(VB6Parser.ResetStmtContext context)
@@ -672,6 +700,36 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
         throw new NotImplementedException("Unlock not implemented");
     }
 
+    public override async Task<ControlFlow> VisitRedimStmt(VB6Parser.RedimStmtContext context)
+    {
+        if (context.PRESERVE() != null)
+            throw new NotImplementedException("PRESERVE not implemented");
+
+        foreach (var redim in context.redimSubStmt())
+        {
+            if (redim.implicitCallStmt_InStmt().iCS_S_VariableOrProcedureCall() is not { } varOrProcCall)
+                throw new NotImplementedException();
+
+            if (varOrProcCall.dictionaryCallStmt() != null)
+                throw new NotImplementedException();
+
+            var variableName = varOrProcCall.ambiguousIdentifier().GetText();
+
+            if (!interpreter.ExecutionContext.TryGetVariable(currentEnv, variableName, out var value))
+                throw new VBCompileErrorException("Unknown variable " + variableName);
+
+            List<(int, int)>? dimensions = await ExtractDimensions(redim.subscripts());
+            Vb6Value.ValueType type = redim.asTypeClause() != null ? ExtractType(redim.asTypeClause(), true) : value.Type;
+
+            if (dimensions == null)
+                throw new VBCompileErrorException("Dimensions required");
+
+            interpreter.ExecutionContext.TryUpdateVariable(currentEnv, variableName, new Vb6Value(type, dimensions));
+        }
+
+        return ControlFlow.Nothing;
+    }
+
     public override async Task<ControlFlow> VisitVariableStmt(VB6Parser.VariableStmtContext context)
     {
         if (context.WITHEVENTS() != null)
@@ -683,30 +741,18 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
             {
                 if (subStmt.typeHint() != null)
                     throw new NotImplementedException("DIM type hints not implemented");
-                if (subStmt.subscripts() != null)
-                    throw new NotImplementedException("DIM subscripts not implemented");
-                Vb6Value value = Vb6Value.Variant;
-                if (subStmt.asTypeClause() != null)
+                bool isArray = false;
+                List<(int, int)>? dimensions = null;
+                if (subStmt.LPAREN() != null && subStmt.RPAREN() != null) // array
                 {
-                    if (subStmt.asTypeClause().NEW() != null)
-                        throw new NotImplementedException("New as type not implemented");
-                    if (subStmt.asTypeClause().fieldLength() != null)
-                        throw new NotImplementedException("fieldLength as type not implemented");
-                    if (subStmt.asTypeClause().type().complexType() != null)
-                        throw new NotImplementedException("complex type as type not implemented");
-                    if (subStmt.asTypeClause().type().baseType().STRING() != null)
-                        value = new Vb6Value("");
-                    else if (subStmt.asTypeClause().type().baseType().INTEGER() != null)
-                        value = new Vb6Value(0);
-                    else if (subStmt.asTypeClause().type().baseType().SINGLE() != null)
-                        value = new Vb6Value(0.0f);
-                    else if (subStmt.asTypeClause().type().baseType().DOUBLE() != null)
-                        value = new Vb6Value(0.0);
-                    else if (subStmt.asTypeClause().type().baseType().BOOLEAN() != null)
-                        value = new Vb6Value(false);
-                    else
-                        throw new NotImplementedException("base type " + subStmt.asTypeClause().type().baseType().GetChild(0) + " not implemented");
+                    isArray = true;
+                    dimensions = await ExtractDimensions(subStmt.subscripts());
                 }
+
+                var type = ExtractType(subStmt.asTypeClause(), isArray);
+
+                Vb6Value value = dimensions != null ? new Vb6Value(type, dimensions) : new Vb6Value(type);
+
                 interpreter.ExecutionContext.AllocVariable(currentEnv, subStmt.ambiguousIdentifier().GetText(), value);
             }
         }
@@ -715,6 +761,37 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
 
         return default;
     }
+
+    private async Task<List<(int, int)>?> ExtractDimensions(VB6Parser.SubscriptsContext? subscripts)
+    {
+        List<(int, int)>? dimensions = null;
+        if (subscripts != null)
+        {
+            dimensions = new List<(int, int)>();
+            int arrayLowerBound;
+            int arrayUpperBound;
+            foreach (var dimension in subscripts.subscript())
+            {
+                var size = dimension.valueStmt();
+                if (size.Length == 2)
+                {
+                    arrayLowerBound = AsType<int>(await expressionExecutor.EvaluateValue(size[0]));
+                    arrayUpperBound = AsType<int>(await expressionExecutor.EvaluateValue(size[1]));
+                }
+                else if (size.Length == 1)
+                {
+                    arrayLowerBound = interpreter.PrePass.ArrayBase;
+                    arrayUpperBound = AsType<int>(await expressionExecutor.EvaluateValue(size[0]));
+                }
+                else
+                    throw new VBCompileErrorException("Either specify upper bound or lower and upper bound");
+                dimensions.Add((arrayLowerBound, arrayUpperBound));
+            }
+        }
+
+        return dimensions;
+    }
+
 
     public override async Task<ControlFlow> VisitWhileWendStmt(VB6Parser.WhileWendStmtContext context)
     {
@@ -746,8 +823,12 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
         {
             ((ICSharpProxy)value.Value!).Call(identifier, callArgs);
         }
+        else if (value.Type == Vb6Value.ValueType.Control)
+        {
+            ((Control)value.Value!).Call(identifier, callArgs);
+        }
         else
-            throw new NotImplementedException($"Unknown method {identifier} on {value}");
+            throw new VBRunTimeException(context, $"Unknown method {identifier} on {value}");
 
         return default;
     }

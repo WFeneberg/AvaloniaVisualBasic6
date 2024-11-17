@@ -10,6 +10,7 @@ public class PrePass : VB6BaseVisitor<object?>
     public Dictionary<string, (VB6Parser.SubStmtContext, ExecutionEnvironment)> subs = new();
     public List<VB6Parser.BlockContext> topLevelBlocks = new();
     public bool RequireVariableDefinitions { get; private set; }
+    public int ArrayBase { get; private set; } = 0;
 
     public PrePass(ExecutionEnvironment rootEnv, ExecutionState state)
     {
@@ -25,7 +26,10 @@ public class PrePass : VB6BaseVisitor<object?>
     }
 
     public override object? VisitOptionBaseStmt(VB6Parser.OptionBaseStmtContext context)
-        => throw new NotImplementedException("Option Base not supported");
+    {
+        ArrayBase = int.Parse(context.INTEGERLITERAL().GetText());
+        return default;
+    }
 
     public override object? VisitOptionCompareStmt(VB6Parser.OptionCompareStmtContext context)
         => throw new NotImplementedException("Option compare not supported");
@@ -50,9 +54,37 @@ public class PrePass : VB6BaseVisitor<object?>
             {
                 if (subStmt.typeHint() != null)
                     throw new NotImplementedException("DIM type hints not implemented");
-                if (subStmt.subscripts() != null)
-                    throw new NotImplementedException("DIM subscripts not implemented");
-                Vb6Value value = Vb6Value.Variant;
+                bool isArray = false;
+                List<(int, int)>? dimensions = null;
+                if (subStmt.LPAREN() != null && subStmt.RPAREN() != null) // array
+                {
+                    isArray = true;
+                    if (subStmt.subscripts() != null)
+                    {
+                        dimensions = new List<(int, int)>();
+                        int arrayLowerBound;
+                        int arrayUpperBound;
+                        foreach (var dimension in subStmt.subscripts().subscript())
+                        {
+                            var size = dimension.valueStmt();
+                            if (size.Length == 2)
+                            {
+                                arrayLowerBound = int.Parse(size[0].GetText());
+                                arrayUpperBound = int.Parse(size[1].GetText());
+                            }
+                            else if (size.Length == 1)
+                            {
+                                arrayLowerBound = ArrayBase;
+                                arrayUpperBound = int.Parse(size[0].GetText());
+                            }
+                            else
+                                throw new VBCompileErrorException("Either specify upper bound or lower and upper bound");
+                            dimensions.Add((arrayLowerBound, arrayUpperBound));
+                        }
+                    }
+                }
+
+                Vb6Value.ValueType type = Vb6Value.ValueType.EmptyVariant;
                 if (subStmt.asTypeClause() != null)
                 {
                     if (subStmt.asTypeClause().NEW() != null)
@@ -62,19 +94,22 @@ public class PrePass : VB6BaseVisitor<object?>
                     if (subStmt.asTypeClause().type().complexType() != null)
                         throw new NotImplementedException("complex type as type not implemented");
                     if (subStmt.asTypeClause().type().baseType().STRING() != null)
-                        value = new Vb6Value("");
+                        type = Vb6Value.ValueType.String;
                     else if (subStmt.asTypeClause().type().baseType().INTEGER() != null)
-                        value = new Vb6Value(0);
+                        type = Vb6Value.ValueType.Integer;
                     else if (subStmt.asTypeClause().type().baseType().SINGLE() != null)
-                        value = new Vb6Value(0.0f);
+                        type = Vb6Value.ValueType.Single;
                     else if (subStmt.asTypeClause().type().baseType().DOUBLE() != null)
-                        value = new Vb6Value(0.0);
+                        type = Vb6Value.ValueType.Double;
                     else if (subStmt.asTypeClause().type().baseType().BOOLEAN() != null)
-                        value = new Vb6Value(false);
+                        type = Vb6Value.ValueType.Boolean;
                     else
                         throw new NotImplementedException("base type " + subStmt.asTypeClause().type().baseType().GetChild(0) + " not implemented");
                 }
+                if (isArray)
+                    type = new Vb6Value.ValueType(type, true);
 
+                var value = dimensions != null ? new Vb6Value(type, dimensions) : new Vb6Value(type);
                 var location = state.Alloc(value);
                 rootEnv.DefineVariable(subStmt.ambiguousIdentifier().GetText(), location);
             }

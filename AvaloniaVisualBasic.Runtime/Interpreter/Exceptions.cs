@@ -10,6 +10,8 @@ public class VBRunTimeException : Exception
     public ParserRuleContext Context { get; }
     private readonly VBStandardError stdError;
 
+    public VBStandardError Error => stdError;
+
     public VBRunTimeException(ParserRuleContext context, VBStandardError stdError, string? extraMessage = null) : base(
         $"Run-time error '{stdError.ErrNo}':\n\n{stdError.Description}" + (extraMessage == null ? "" : "\n\n" + extraMessage))
     {
@@ -44,7 +46,7 @@ public class VBVariableNotDefinedException : VBCompileErrorException
 
 public class VBMethodOrDataMemberNotFoundException : VBCompileErrorException
 {
-    public VBMethodOrDataMemberNotFoundException(string ident, ValueType type) : base($"Method or data member not found ({ident} in {type})") {}
+    public VBMethodOrDataMemberNotFoundException(string ident, AvaloniaVisualBasic.Runtime.Interpreter.Vb6Value.ValueType type) : base($"Method or data member not found ({ident} in {type})") {}
 }
 
 public struct VBStandardError

@@ -12,6 +12,7 @@
         <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="Classic.Avalonia.Theme" Version="$(ClassicAvaloniaVersion)"/>
+        <PackageReference Include="LanguageExt.Core" Version="4.4.9" />
         <PackageReference Include="PropertyChanged.SourceGenerator" Version="1.0.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
