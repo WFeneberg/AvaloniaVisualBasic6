@@ -211,7 +211,7 @@ public partial class FormEditViewModel : BaseEditorWindowViewModel
 
     public void DeleteSelected()
     {
-        if (selectedComponent == null)
+        if (selectedComponent == null || selectedComponent == Form)
             return;
 
         var component = selectedComponent;

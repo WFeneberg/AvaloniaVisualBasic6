@@ -2,10 +2,11 @@ using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using AvaloniaVisualBasic.Controls;
 using AvaloniaVisualBasic.Events;
+using R3;
 
 namespace AvaloniaVisualBasic.VisualDesigner;
 
@@ -27,15 +28,22 @@ public partial class FormEditView : UserControl
     private Point newControlInitialPress;
     private bool isSpawningNewControl;
     private IDisposable? activateSub;
+    private IDisposable? selectedComponentSub;
 
     private void OnNewPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (isSpawningNewControl && NewControlSpawnerPhantom.IsVisible)
         {
             if (DataContext is FormEditViewModel vm)
+            {
                 vm.SpawnControl(new Rect(Canvas.GetLeft(NewControlSpawnerPhantom),
                     Canvas.GetTop(NewControlSpawnerPhantom), NewControlSpawnerPhantom.Width,
                     NewControlSpawnerPhantom.Height));
+                if (ControlsContainer.ContainerFromIndex(ControlsContainer.SelectedIndex) is { } control)
+                {
+                    control.Focus();
+                }
+            }
             NewControlSpawnerPhantom.IsVisible = false;
         }
         isSpawningNewControl = false;
@@ -109,6 +117,7 @@ public partial class FormEditView : UserControl
     {
         base.OnAttachedToVisualTree(e);
         activateSub?.Dispose();
+        selectedComponentSub?.Dispose();
         if (DataContext is FormEditViewModel vm)
         {
             activateSub = vm.EventBus.Subscribe<ActivateFormEditorEvent>(form =>
@@ -119,6 +128,19 @@ public partial class FormEditView : UserControl
                     form.Handled = true;
                 }
             });
+
+            selectedComponentSub = vm.ObservePropertyChanged(x => x.SelectedComponent)
+                .Subscribe(selectedComponent =>
+                {
+                    if (selectedComponent == vm.Form)
+                    {
+                        AdornerLayer.SetAdorner(FormContainer, new ResizeAdorner(){AllowedDirection= ResizeAdornerDirections.All &~ (ResizeAdornerDirections.Left | ResizeAdornerDirections.Top) });
+                    }
+                    else
+                    {
+                        AdornerLayer.SetAdorner(FormContainer, null);
+                    }
+                });
         }
     }
 
@@ -126,5 +148,18 @@ public partial class FormEditView : UserControl
     {
         base.OnDetachedFromVisualTree(e);
         activateSub?.Dispose();
+        selectedComponentSub?.Dispose();
+    }
+
+    protected override void OnTextInput(TextInputEventArgs e)
+    {
+        base.OnTextInput(e);
+        if (e.Source is Control c)
+        {
+            if (DataContext is FormEditViewModel viewModel)
+            {
+                viewModel.EventBus.Publish(new TextInputForPropertyEvent(e.Text));
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace AvaloniaVisualBasic.VisualDesigner;
 
 public partial class PropertiesToolViewModel : Tool
 {
+    public IEventBus EventBus { get; }
     private readonly IWindowManager windowManager;
     public ObservableCollection<ComponentInstanceViewModel>? ComponentsProxy => currentDocument?.AllComponents;
     public ObservableCollection<PropertyViewModel> Properties { get; } = new();
@@ -41,8 +42,10 @@ public partial class PropertiesToolViewModel : Tool
     private ComponentInstanceViewModel? currentComponent;
 
     public PropertiesToolViewModel(IMdiWindowManager mdiWindowManager,
+        IEventBus eventBus,
         IWindowManager windowManager)
     {
+        EventBus = eventBus;
         this.windowManager = windowManager;
         Title = "Properties";
         CanPin = false;
@@ -87,8 +90,6 @@ public partial class PropertiesToolViewModel : Tool
                                     var prop = properties[propertyClass] = new PropertyViewModel(this, propertyClass, component.Instance.GetBoxedPropertyOrDefault(propertyClass));
                                     Properties.Add(prop);
                                 }
-
-                                SelectedProperty = Properties.FirstOrDefault(x => x.PropertyClass == lastSelectedPropertyClass);
                                 foreach (var categoryGroup in component.Instance.BaseClass.Properties.GroupBy(p => p.Category))
                                 {
                                     CategorizedProperties.Add(new PropertyCategoryViewModel(this, categoryGroup.Key));
@@ -98,6 +99,13 @@ public partial class PropertiesToolViewModel : Tool
                                         CategorizedProperties.Add(prop);
                                     }
                                 }
+
+                                SelectedProperty = Properties.FirstOrDefault(x => x.PropertyClass == lastSelectedPropertyClass) ??
+                                                   /* hardcoded default properties */
+                                                   Properties.FirstOrDefault(x => x.PropertyClass == VBProperties.CaptionProperty) ??
+                                                   Properties.FirstOrDefault(x => x.PropertyClass == VBProperties.IntervalProperty) ??
+                                                   Properties.FirstOrDefault(x => x.PropertyClass == VBProperties.ShapeProperty) ??
+                                                   Properties.FirstOrDefault(x => x.PropertyClass == VBProperties.NameProperty);
 
                                 currentComponent.Instance.OnComponentPropertyChanged += OnComponentValueChanged;
                             }

@@ -1,7 +1,9 @@
 using System;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 
@@ -10,12 +12,22 @@ namespace AvaloniaVisualBasic.Controls;
 public class ResizeAdorner : TemplatedControl
 {
     public static readonly AttachedProperty<ResizeXDirection> ResizeXDirectionProperty = AvaloniaProperty.RegisterAttached<ResizeAdorner, Control, ResizeXDirection>("ResizeXDirection");
+
     public static ResizeXDirection GetResizeXDirection(AvaloniaObject element) => element.GetValue(ResizeXDirectionProperty);
     public static void SetResizeXDirection(AvaloniaObject element, ResizeXDirection value) => element.SetValue(ResizeXDirectionProperty, value);
 
     public static readonly AttachedProperty<ResizeYDirection> ResizeYDirectionProperty = AvaloniaProperty.RegisterAttached<ResizeAdorner, Control, ResizeYDirection>("ResizeYDirection");
     public static ResizeYDirection GetResizeYDirection(AvaloniaObject element) => element.GetValue(ResizeYDirectionProperty);
     public static void SetResizeYDirection(AvaloniaObject element, ResizeYDirection value) => element.SetValue(ResizeYDirectionProperty, value);
+
+    public static readonly StyledProperty<ResizeAdornerDirections> AllowedDirectionProperty =
+        AvaloniaProperty.Register<ResizeAdorner, ResizeAdornerDirections>(nameof(AllowedDirection), ResizeAdornerDirections.All);
+
+    public ResizeAdornerDirections AllowedDirection
+    {
+        get => GetValue(AllowedDirectionProperty);
+        set => SetValue(AllowedDirectionProperty, value);
+    }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -178,4 +190,37 @@ public enum ResizeYDirection
     None,
     Bottom,
     Top
+}
+
+[Flags]
+public enum ResizeAdornerDirections
+{
+    S = 1,
+    N = 2,
+    W = 4,
+    E = 8,
+    SE = 16,
+    NE = 32,
+    SW = 64,
+    NW = 128,
+    Left = W | SW | NW,
+    Top = N | NE | NW,
+    Right = E | SE | NE,
+    Bottom = S | SW | SE,
+    All = Left | Top | Right | Bottom
+}
+
+public class HasResizeAdornerDirectionConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is ResizeAdornerDirections dirs && parameter is ResizeAdornerDirections dir)
+            return (dirs & dir) == dir;
+        return null;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Data.Converters;
 
 namespace AvaloniaVisualBasic.Controls;
 
@@ -94,8 +91,7 @@ public class PropertyEnumBox : TemplatedControl
         if (PropertyType != null && PropertyType.IsEnum)
         {
             var newOptions = new List<PropertyEnumViewModel>();
-            foreach (var enumValue in Enum.GetValuesAsUnderlyingType(PropertyType).OfType<object>()
-                         .Zip(Enum.GetNames(PropertyType)))
+            foreach (var enumValue in Enumerable.Zip(Enum.GetValuesAsUnderlyingType(PropertyType).OfType<object>(), Enum.GetNames(PropertyType)))
             {
                 newOptions.Add(new PropertyEnumViewModel(enumValue.First, $"{enumValue.First} - {enumValue.Second.TrimStart('_')}"));
             }
@@ -143,6 +139,8 @@ public class PropertyEnumViewModel
 {
     public object UnderlyingValue { get; }
     private string toString;
+
+    public string Text => toString;
 
     public PropertyEnumViewModel(object underlyingValue,
         string name)

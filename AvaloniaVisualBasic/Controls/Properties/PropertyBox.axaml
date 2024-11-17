@@ -84,6 +84,11 @@
                     ItemsSource="{TemplateBinding Options}"
                     SelectedItem="{TemplateBinding SelectedViewModel, Mode=TwoWay}"
                     BorderThickness="0">
+                    <ComboBox.Styles>
+                        <Style Selector="ComboBoxItem">
+                            <Setter Property="(TextSearch.Text)" Value="{CompiledBinding Text}" x:DataType="controls:PropertyEnumViewModel" />
+                        </Style>
+                    </ComboBox.Styles>
                 </ComboBox>
             </ControlTemplate>
         </Setter>

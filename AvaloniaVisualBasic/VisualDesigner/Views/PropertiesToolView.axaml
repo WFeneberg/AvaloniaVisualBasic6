@@ -49,11 +49,12 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TabControl Grid.Row="1">
-            <TabItem Header="Alphabetic">
+        <TabControl Grid.Row="1" Name="TabProperties">
+            <TabItem Header="Alphabetic" x:Name="AlphabeticPropertiesTab">
                 <ListBox SelectedItem="{CompiledBinding SelectedProperty}"
                          ItemTemplate="{StaticResource PropertyTemplate}"
-                         ItemsSource="{CompiledBinding Properties}">
+                         ItemsSource="{CompiledBinding Properties}"
+                         x:Name="AlphabeticProperties">
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
                             <Setter Property="Padding" Value="0" />
@@ -61,9 +62,10 @@
                     </ListBox.Styles>
                 </ListBox>
             </TabItem>
-            <TabItem Header="Categorized">
+            <TabItem Header="Categorized" x:Name="CategorizedPropertiesTab">
                 <ListBox SelectedItem="{CompiledBinding SelectedProperty}"
-                         ItemsSource="{CompiledBinding CategorizedProperties}">
+                         ItemsSource="{CompiledBinding CategorizedProperties}"
+                         x:Name="CategorizedProperties">
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
                             <Setter Property="Padding" Value="0" />
