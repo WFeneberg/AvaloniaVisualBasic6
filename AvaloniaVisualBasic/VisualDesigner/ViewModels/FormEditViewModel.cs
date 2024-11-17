@@ -84,7 +84,7 @@ public partial class FormEditViewModel : BaseEditorWindowViewModel
             {
                 orderedComponents.Add(component.Instance);
             }
-            formDefinition.UpdateComponents(orderedComponents);
+            formDefinition?.UpdateComponents(orderedComponents);
         }));
         AutoDispose(this.eventBus.Subscribe<FormUnloadedEvent>(e =>
         {
@@ -117,6 +117,7 @@ public partial class FormEditViewModel : BaseEditorWindowViewModel
         return this;
     }
 
+    /* ctr only for the previewer! */
     public FormEditViewModel()
     {
         Form = new ComponentInstanceViewModel(this, new ComponentInstance(FormComponentClass.Instance, "Form1")
@@ -124,6 +125,11 @@ public partial class FormEditViewModel : BaseEditorWindowViewModel
             .SetProperty(VBProperties.HeightProperty, 300)
             .SetProperty(VBProperties.CaptionProperty, "Form1"));
         AllComponents.Add(Form);
+        eventBus = null!;
+        projectService = null!;
+        editorService = null!;
+        windowManager = null!;
+        ToolsBoxToolViewModel = null!;
     }
 
     public void SpawnControlCenter(ComponentBaseClass componentClass)
@@ -220,9 +226,9 @@ public partial class FormEditViewModel : BaseEditorWindowViewModel
         AllComponents.Remove(component);
     }
 
-    public void SaveForm() => projectService.SaveForm(formDefinition, false).ListenErrors();
+    public void SaveForm() => projectService.SaveForm(formDefinition!, false).ListenErrors();
 
-    public void SaveFormAs() => projectService.SaveForm(formDefinition, true).ListenErrors();
+    public void SaveFormAs() => projectService.SaveForm(formDefinition!, true).ListenErrors();
 
     public void ViewCode() => editorService.EditCode(formDefinition);
 
@@ -291,7 +297,7 @@ public partial class FormEditViewModel : BaseEditorWindowViewModel
         // this is a hack, the following line can be executed only after the window is created, it should be solved in a better way.
         DispatcherTimer.RunOnce(() =>
         {
-            eventBus.Publish(new CreateOrNavigateToSubEvent(formDefinition, subName));
+            eventBus.Publish(new CreateOrNavigateToSubEvent(formDefinition!, subName));
         }, TimeSpan.FromMilliseconds(16));
     }
 }

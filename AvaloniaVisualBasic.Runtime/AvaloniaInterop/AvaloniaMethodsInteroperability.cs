@@ -24,6 +24,5 @@ public static class AvaloniaMethodsInteroperability
         }
 
         throw new Exception($"Unknown method {method} on {c}");
-        return Vb6Value.Nothing;
     }
 }

@@ -8,7 +8,6 @@ namespace AvaloniaVisualBasic.IDE;
 public class ManagedWindow : MDIWindow
 {
     protected override Type StyleKeyOverride => typeof(MDIWindow);
-    public event Action? RequestClose;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {

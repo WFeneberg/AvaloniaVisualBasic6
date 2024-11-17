@@ -450,8 +450,6 @@ public partial class StatementExecutor : VB6Visitor<Task<ControlFlow>>
         {
             throw new NotImplementedException($"{context.implicitCallStmt_InStmt()} is not supported");
         }
-
-        return default;
     }
 
     public override async Task<ControlFlow> VisitLineInputStmt(VB6Parser.LineInputStmtContext context)

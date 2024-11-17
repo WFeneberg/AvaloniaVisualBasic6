@@ -11,8 +11,6 @@ namespace AvaloniaVisualBasic.Controls;
 public class PropertyColorBox : TemplatedControl
 {
     private ListBox? paletteListBox, systemColorsListBox;
-    private bool systemColorListBoxSetting;
-    private bool paletteListBoxSetting;
     private bool syncing;
 
     public static readonly StyledProperty<VBColor> ColorProperty = AvaloniaProperty.Register<PropertyColorBox, VBColor>(nameof(Color), defaultBindingMode: BindingMode.TwoWay);

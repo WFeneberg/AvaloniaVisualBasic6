@@ -16,15 +16,15 @@
              x:Class="AvaloniaVisualBasic.MainView">
     <input:CommandManager.CommandBindings>
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.NYICommand}"
-                               ExecutingCommand="{CompiledBinding NYI}" />
+                              ExecutingCommand="{CompiledBinding NYI}" />
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.NewProjectCommand}"
                               ExecutingCommand="{CompiledBinding NewProject}"/>
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.AddProjectCommand}"
                               ExecutingCommand="{CompiledBinding AddProject}"/>
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.AvaloniaOnWebCommand}"
-                               Executed="AvaloniaOnWeb"/>
+                              Executed="AvaloniaOnWeb"/>
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.AboutCommand}"
-                              Executed="About" />
+                              ExecutingCommand="{CompiledBinding About}" />
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.AddInManagerCommand}"
                               ExecutingCommand="{CompiledBinding OpenAddInManager}" />
         <input:CommandBinding Command="{x:Static vb:ApplicationCommands.OpenOptionsCommand}"

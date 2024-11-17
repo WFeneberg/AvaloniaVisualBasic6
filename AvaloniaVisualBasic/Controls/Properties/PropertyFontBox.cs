@@ -5,6 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using AvaloniaVisualBasic.Runtime.BuiltinTypes;
+using AvaloniaVisualBasic.Utils;
 using Classic.CommonControls.Dialogs;
 
 namespace AvaloniaVisualBasic.Controls;
@@ -36,15 +37,14 @@ public class PropertyFontBox : TemplatedControl
     {
         async Task OpenFontWindow()
         {
-            var result = await FontDialog.ShowDialog(this.VisualRoot as Window, new FontDialogResult(
-                Font.FontFamily, Font.Style, Font.Weight, Font.Size));
+            var result = await Static.RootViewModel.WindowManager.ShowFontDialog(new FontDialogResult(Font.FontFamily, Font.Style, Font.Weight, Font.Size));
             if (result != null)
             {
                 SetCurrentValue(FontProperty, new VBFont(result.Family, (int)result.Size, result.Weight, result.Style));
             }
         }
 
-        OpenFontWindow();
+        OpenFontWindow().ListenErrors();
     }
 
     static PropertyFontBox()

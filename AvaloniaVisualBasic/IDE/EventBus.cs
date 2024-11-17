@@ -44,8 +44,8 @@ public class EventBus : IEventBus
 
     private class Handler<T> : BaseHandler where T : IEvent
     {
-        private List<BaseHandler> list;
-        private Action<T> action;
+        private List<BaseHandler>? list;
+        private Action<T>? action;
 
         public Handler(List<BaseHandler> list, Action<T> action)
         {
@@ -55,12 +55,12 @@ public class EventBus : IEventBus
 
         public void Execute(T @event)
         {
-            action(@event);
+            action?.Invoke(@event);
         }
 
         public override void Dispose()
         {
-            list.Remove(this);
+            list?.Remove(this);
             list = null;
             action = null;
         }

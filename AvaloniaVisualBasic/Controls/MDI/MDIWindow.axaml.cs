@@ -17,8 +17,8 @@ namespace AvaloniaVisualBasic.Controls;
 
 public class MDIWindow : ContentControl
 {
-    private ClassicBorderDecorator border;
-    private Border titleBar;
+    private ClassicBorderDecorator? border;
+    private Border? titleBar;
 
     public static readonly StyledProperty<IImage?> IconProperty = AvaloniaProperty.Register<MDIWindow, IImage?>("Icon");
     public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<MDIWindow, string>("Title");
@@ -79,15 +79,16 @@ public class MDIWindow : ContentControl
 
         var contentPresenter = e.NameScope.Get<ContentPresenter>("PART_ContentPresenter");
         contentPresenter.GetObservable(ContentPresenter.ChildProperty)
-            .Subscribe(new ActionObserver<Control>(control =>
+            .Subscribe(new ActionObserver<Control?>(control =>
             {
                 var child = contentPresenter.Child;
                 if (child != null)
                 {
                     child.GetObservable(CommandManager.CommandBindingsProperty)
-                        .Subscribe(new ActionObserver<IList<CommandBinding>>(bindings =>
+                        .Subscribe(new ActionObserver<IList<CommandBinding>?>(bindings =>
                         {
-                            CommandManager.SetCommandBindings(this, bindings);
+                            if (bindings != null)
+                                CommandManager.SetCommandBindings(this, bindings);
                         }));
                 }
             }));
@@ -134,7 +135,8 @@ public class MDIWindow : ContentControl
             }
         }
 
-        border.Cursor = new Cursor(cursor);
+        if (border != null)
+            border.Cursor = new Cursor(cursor);
     }
 
     private void OnBorderReleased(object? sender, PointerReleasedEventArgs e)

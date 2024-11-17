@@ -54,6 +54,8 @@ public class MDIHost : ItemsControl
         for (int i = 0; i < windowCount; ++i)
         {
             var container = ContainerFromIndex(i);
+            if (container == null)
+                continue;
             MDIHostPanel.SetWindowState(container, WindowState.Normal);
             MDIHostPanel.SetWindowLocation(container, orientation == Orientation.Horizontal ? new Point(x, 0) : new Point(0, y));
             MDIHostPanel.SetWindowSize(container, windowSize);
@@ -77,6 +79,8 @@ public class MDIHost : ItemsControl
             x += 20;
             y += 20;
             var container = ContainerFromIndex(i);
+            if (container == null)
+                continue;
             MDIHostPanel.SetWindowState(container, WindowState.Normal);
             MDIHostPanel.SetWindowLocation(container, new Point(x, y));
             MDIHostPanel.SetWindowSize(container, windowSize);

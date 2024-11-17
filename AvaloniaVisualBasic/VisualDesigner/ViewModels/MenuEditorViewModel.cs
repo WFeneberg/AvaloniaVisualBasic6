@@ -144,13 +144,15 @@ public partial class MenuViewModel : ObservableObject
 
     public MenuViewModel()
     {
+        caption = "";
+        name = "";
     }
 
     public MenuViewModel(ComponentInstance menu)
     {
         Menu = menu;
         caption = menu.GetPropertyOrDefault(VBProperties.CaptionProperty) ?? "";
-        name = menu.GetPropertyOrDefault(VBProperties.NameProperty);
+        name = menu.GetPropertyOrDefault(VBProperties.NameProperty) ?? "";
         isChecked = menu.GetPropertyOrDefault(VBProperties.CheckedProperty);
         isEnable = menu.GetPropertyOrDefault(VBProperties.EnabledProperty);
         isVisible = menu.GetPropertyOrDefault(VBProperties.VisibleProperty);

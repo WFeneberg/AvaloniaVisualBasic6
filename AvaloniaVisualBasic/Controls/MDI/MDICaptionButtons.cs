@@ -33,7 +33,7 @@ public class MDICaptionButtons : CaptionButtons
         }
     }
 
-    private void Detach()
+    private new void Detach()
     {
         if (disposables != null)
         {

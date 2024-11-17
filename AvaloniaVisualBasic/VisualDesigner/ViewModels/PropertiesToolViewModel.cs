@@ -172,6 +172,7 @@ public partial class PropertiesToolViewModel : Tool
         }
         catch (Exception e)
         {
+            Console.WriteLine(e);
             windowManager.MessageBox("Invalid property value", icon: MessageBoxIcon.Error).ListenErrors();
         }
     }

@@ -28,6 +28,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var rootViewModel = new DISetup().Root;
+        Static.RootViewModel = rootViewModel;
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

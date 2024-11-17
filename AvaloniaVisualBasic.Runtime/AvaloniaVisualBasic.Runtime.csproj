@@ -6,6 +6,8 @@
         <WarningsAsErrors>nullable</WarningsAsErrors>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <TrimMode>full</TrimMode>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>$(NoWarn);CS1998</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

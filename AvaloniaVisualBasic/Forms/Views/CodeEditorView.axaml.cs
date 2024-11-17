@@ -94,6 +94,9 @@ public partial class CodeEditorView : UserControl
         // Get top level from the current control. Alternatively, you can use Window reference instead.
         var topLevel = TopLevel.GetTopLevel(this);
 
+        if (topLevel == null)
+            return;
+        
         // Start async operation to open the dialog.
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {

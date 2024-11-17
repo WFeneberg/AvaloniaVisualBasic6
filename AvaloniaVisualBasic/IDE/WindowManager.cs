@@ -10,13 +10,12 @@ using Avalonia.Platform.Storage;
 using AvaloniaVisualBasic.Controls;
 using AvaloniaVisualBasic.Utils;
 using Classic.CommonControls.Dialogs;
-using Pure.DI;
 
 namespace AvaloniaVisualBasic.IDE;
 
 public class WindowManager : IWindowManager
 {
-    private Window? GetTopWindow(IClassicDesktopStyleApplicationLifetime lifetime)
+    private Window GetTopWindow(IClassicDesktopStyleApplicationLifetime lifetime)
     {
         foreach (var window in lifetime.Windows)
         {
@@ -24,7 +23,7 @@ public class WindowManager : IWindowManager
                 return window;
         }
 
-        return lifetime.MainWindow;
+        return lifetime.MainWindow ?? throw new Exception("No main window and trying to open a window, fatal error");
     }
 
     public Task ShowManagedWindow(MDIWindow window)
@@ -77,7 +76,7 @@ public class WindowManager : IWindowManager
 
             dialog.CloseRequested -= DialogOnCloseRequested;
         }
-        else if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        else if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var window = new DialogWindow()
             {
@@ -127,7 +126,7 @@ public class WindowManager : IWindowManager
 
             return ret[0];
         }
-        else if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        else if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             return await Classic.CommonControls.Dialogs.InputBox.ShowDialog(GetTopWindow(desktop), prompt, caption, defaultText);
         }
@@ -164,7 +163,7 @@ public class WindowManager : IWindowManager
 
             return ret[0];
         }
-        else if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        else if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             return await Classic.CommonControls.Dialogs.MessageBox.ShowDialog(GetTopWindow(desktop), text, caption, buttons, icon);
         }
@@ -172,12 +171,86 @@ public class WindowManager : IWindowManager
             throw new NotImplementedException();
     }
 
+    public async Task ShowAbout(AboutDialogOptions options)
+    {
+        if (Static.SingleView)
+        {
+            AboutDialogViewModel aboutDialogViewModel = new AboutDialogViewModel(options);
+            var aboutDialog = new AboutDialog()
+            {
+                DataContext = aboutDialogViewModel
+            };
+            var task = ShowManagedWindow(out var window, "About " + options.Title, aboutDialog, false);
+
+            aboutDialogViewModel.CloseRequested += MessageBoxOnCloseRequested;
+
+            void MessageBoxOnCloseRequested()
+            {
+                window.CloseCommand.Execute(window.CloseCommandParameter);
+            }
+
+            await task;
+
+            aboutDialogViewModel.CloseRequested -= MessageBoxOnCloseRequested;
+        }
+        else if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            await AboutDialog.ShowDialog(GetTopWindow(desktop), options);
+        }
+        else
+            throw new NotImplementedException();
+    }
+
+    public async Task<FontDialogResult?> ShowFontDialog(FontDialogResult? initial = null)
+    {
+        if (Static.SingleView)
+        {
+            FontDialogViewModel fontDialogViewModel = new FontDialogViewModel(initial);
+
+            var messageBox = new FontDialog()
+            {
+                DataContext = fontDialogViewModel
+            };
+            var task = ShowManagedWindow(out var window, "Font", messageBox, false);
+
+            FontDialogResult?[] ret = new FontDialogResult?[1];
+
+            fontDialogViewModel.AcceptRequested += Accept;
+            fontDialogViewModel.CancelRequested += Cancel;
+
+            void Accept(FontDialogResult? result)
+            {
+                ret[0] = result;
+                window.CloseCommand.Execute(window.CloseCommandParameter);
+            }
+
+            void Cancel()
+            {
+                ret[0] = null;
+                window.CloseCommand.Execute(window.CloseCommandParameter);
+            }
+
+            await task;
+
+            fontDialogViewModel.AcceptRequested -= Accept;
+            fontDialogViewModel.CancelRequested -= Cancel;
+
+            return ret[0];
+        }
+        else if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            return await FontDialog.ShowDialog(GetTopWindow(desktop), initial);
+        }
+        else
+            throw new NotImplementedException();
+    }
+
     public async Task<IReadOnlyList<string>?> OpenFilePickerAsync(FilePickerOpenOptions options)
     {
-        if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime classic)
+        if (Application.Current!.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime classic)
             throw new Exception("This is supported only for desktop apps");
 
-        var topLevel = TopLevel.GetTopLevel(GetTopWindow(classic));
+        var topLevel = TopLevel.GetTopLevel(GetTopWindow(classic))!;
 
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(options);
 
@@ -189,10 +262,10 @@ public class WindowManager : IWindowManager
 
     public async Task<string?> SaveFilePickerAsync(FilePickerSaveOptions options)
     {
-        if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime classic)
+        if (Application.Current!.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime classic)
             throw new Exception("This is supported only for desktop apps");
 
-        var topLevel = TopLevel.GetTopLevel(GetTopWindow(classic));
+        var topLevel = TopLevel.GetTopLevel(GetTopWindow(classic))!;
 
         var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
 
@@ -221,7 +294,7 @@ public class WindowManager : IWindowManager
 
             return ret[0];
         }
-        else if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        else if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var window = new DialogWindow()
             {

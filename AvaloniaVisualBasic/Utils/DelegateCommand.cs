@@ -30,6 +30,11 @@ public class DelegateCommand<T> : ICommand
     }
 
     public event EventHandler? CanExecuteChanged;
+
+    public void RaiseCanExecutedChanged()
+    {
+        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
 }
 
 public class DelegateCommand : ICommand

@@ -15,4 +15,6 @@ public interface IWindowManager
     Task<string?> InputBox(string prompt, string? caption, string defaultText);
     Task<IReadOnlyList<string>?> OpenFilePickerAsync(FilePickerOpenOptions options);
     Task<string?> SaveFilePickerAsync(FilePickerSaveOptions options);
+    Task ShowAbout(AboutDialogOptions options);
+    Task<FontDialogResult?> ShowFontDialog(FontDialogResult? initial = null);
 }

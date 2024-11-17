@@ -19,10 +19,10 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Build and Publish AvaloniaVisualBasic.Desktop (Windows)
-      run: dotnet publish AvaloniaVisualBasic.Desktop -f net9.0 -o bin/windows/ -p:PublishAot=true -p:PublishTrimmed=true
+      run: dotnet publish AvaloniaVisualBasic.Desktop -f net9.0 -o bin/windows/ -p:PublishAot=true -p:PublishTrimmed=true -p:WarningAsErrors=false
 
     - name: Build and Publish AvaloniaVisualBasic.Standalone (Windows)
-      run: dotnet publish AvaloniaVisualBasic.Standalone -f net9.0 -o bin/windows/standalone/ -p:PublishAot=true -p:PublishTrimmed=true
+      run: dotnet publish AvaloniaVisualBasic.Standalone -f net9.0 -o bin/windows/standalone/ -p:PublishAot=true -p:PublishTrimmed=true -p:WarningAsErrors=false
 
     - name: Remove Debug Symbols (Windows)
       run: |
@@ -66,10 +66,10 @@ jobs:
         java-version: '21'
 
     - name: Build and Publish AvaloniaVisualBasic.Desktop (Linux)
-      run: dotnet publish AvaloniaVisualBasic.Desktop -f net9.0 -o bin/linux/ -p:PublishAot=true -p:PublishTrimmed=true
+      run: dotnet publish AvaloniaVisualBasic.Desktop -f net9.0 -o bin/linux/ -p:PublishAot=true -p:PublishTrimmed=true -p:WarningAsErrors=false
 
     - name: Build and Publish AvaloniaVisualBasic.Standalone (Linux)
-      run: dotnet publish AvaloniaVisualBasic.Standalone -f net9.0 -o bin/linux/standalone/ -p:PublishAot=true -p:PublishTrimmed=true
+      run: dotnet publish AvaloniaVisualBasic.Standalone -f net9.0 -o bin/linux/standalone/ -p:PublishAot=true -p:PublishTrimmed=true -p:WarningAsErrors=false
 
     - name: Remove Debug Symbols (Linux)
       run: |
@@ -112,10 +112,10 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Build and Publish AvaloniaVisualBasic.Desktop (macOS)
-      run: dotnet publish AvaloniaVisualBasic.Desktop -f net9.0 -o bin/macos/ -p:PublishAot=true -p:PublishTrimmed=true
+      run: dotnet publish AvaloniaVisualBasic.Desktop -f net9.0 -o bin/macos/ -p:PublishAot=true -p:PublishTrimmed=true -p:WarningAsErrors=false
 
     - name: Build and Publish AvaloniaVisualBasic.Standalone (macOS)
-      run: dotnet publish AvaloniaVisualBasic.Standalone -f net9.0 -o bin/macos/standalone/ -p:PublishAot=true -p:PublishTrimmed=true
+      run: dotnet publish AvaloniaVisualBasic.Standalone -f net9.0 -o bin/macos/standalone/ -p:PublishAot=true -p:PublishTrimmed=true -p:WarningAsErrors=false
 
     - name: Remove Debug Symbols (macOS)
       run: |
@@ -138,7 +138,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: macos-bin
-        path: ./bin/macos/vb6-macos-arm64.tar
+        path: ./bin/macos/vb6-macos-arm64.tar.gz
 
     - name: Release
       uses: softprops/action-gh-release@v2

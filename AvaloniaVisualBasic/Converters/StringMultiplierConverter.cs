@@ -7,7 +7,7 @@ namespace AvaloniaVisualBasic.Converters;
 
 public class StringMultiplierConverter : IValueConverter
 {
-    public string String { get; set; }
+    public string String { get; set; } = "";
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

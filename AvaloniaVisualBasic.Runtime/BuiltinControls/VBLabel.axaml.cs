@@ -80,8 +80,6 @@ public class VBLabel : TemplatedControl
     }
 
     private ClassicBorderDecorator? decorator;
-    private TextBlock? textblock;
-    private AccessText? accessText;
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {

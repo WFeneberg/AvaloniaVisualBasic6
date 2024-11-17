@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using AvaloniaVisualBasic.Controls;
 using AvaloniaVisualBasic.Events;
 using AvaloniaVisualBasic.Forms.ViewModels;
@@ -36,6 +38,8 @@ public partial class MainViewViewModel : ObservableObject
     private readonly IEventBus eventBus;
 
     public IMdiWindowManager MdiWindowManager { get; }
+
+    public IWindowManager WindowManager => windowManager;
 
     public ToolBoxToolViewModel ToolBox { get; }
 
@@ -286,7 +290,7 @@ public partial class MainViewViewModel : ObservableObject
 
     public void NYI()
     {
-        MessageBox.ShowDialog((Application.Current.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime).MainWindow, "This feature is not yet implemented.", "NYI", MessageBoxButtons.Ok, MessageBoxIcon.Information);
+        windowManager.MessageBox("This feature is not yet implemented", "NYI", MessageBoxButtons.Ok, MessageBoxIcon.Information);
     }
 
     public void SaveProject() => projectService.SaveAllProjects(false).ListenErrors();
@@ -304,6 +308,17 @@ public partial class MainViewViewModel : ObservableObject
     public void OpenAddInManager() => windowManager.ShowDialog(new AddInManagerViewModel());
 
     public void OpenOptions() => windowManager.ShowDialog(new OptionsViewModel());
+
+    public void About()
+    {
+        windowManager.ShowAbout(new AboutDialogOptions()
+        {
+            Copyright = "Copyleft BAndysc 2024",
+            Title = "Avalonia Visual Basic 6",
+            SubTitle = "For 32-bit and 64-bit cross-platform Development",
+            Icon = new Bitmap(AssetLoader.Open(new Uri("avares://AvaloniaVisualBasic/Icons/about.gif")))
+        }).ListenErrors();
+    }
 
     public async Task NewProject()
     {
@@ -341,7 +356,7 @@ public partial class MainViewViewModel : ObservableObject
                 buttons: MessageBoxButtons.YesNo) == MessageBoxResult.No)
             return;
 
-        TopLevel.GetTopLevel(Static.MainView).Launcher.LaunchUriAsync(new Uri("https://github.com/BAndysc/AvaloniaVisualBasic6"));
+        TopLevel.GetTopLevel(Static.MainView)!.Launcher.LaunchUriAsync(new Uri("https://github.com/BAndysc/AvaloniaVisualBasic6")).ListenErrors();
     }
 
     public void TileHorizontally() => eventBus.Publish(new RearrangeMDIEvent(MDIRearrangeKind.TileHorizontally));
@@ -371,17 +386,18 @@ public partial class MainViewViewModel : ObservableObject
         var opened = FindDock<IDockable>(x => ReferenceEquals(x, tool));
         if (opened != null)
         {
-            dockFactory.SetFocusedDockable(opened.Owner as IDock, opened);
+            dockFactory.SetFocusedDockable((IDock)opened.Owner!, opened);
             return;
         }
 
-        var middle = FindDock<IDock>(x => x.Context?.Equals(right ? nameof(DockFactory.RightDock) : nameof(DockFactory.MiddleDock)) ?? false);
+        var middle = FindDock<IDock>(x => x.Context?.Equals(right ? nameof(DockFactory.RightDock) : nameof(DockFactory.MiddleDock)) ?? false)!;
         var toolDock = dockFactory.CreateToolDock();
         toolDock.ActiveDockable = tool;
         toolDock.Factory = dockFactory;
         toolDock.Proportion = 0.3;
         toolDock.VisibleDockables = dockFactory.CreateList<IDockable>(tool);
         toolDock.Alignment = right ? Alignment.Right : Alignment.Bottom;
+        middle.VisibleDockables ??= dockFactory.CreateList<IDockable>();
         middle.VisibleDockables.Add(new ProportionalDockSplitter());
         middle.VisibleDockables.Add(toolDock);
         dockFactory.InitDockable(toolDock, middle);

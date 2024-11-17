@@ -76,14 +76,14 @@ public partial class CodeEditorViewModel : BaseEditorWindowViewModel
         }));
         AutoDispose(this.eventBus.Subscribe<ApplyAllUnsavedChangesEvent>(e =>
         {
-            formDefinition.UpdateCode(Document.Text);
+            formDefinition?.UpdateCode(Document.Text);
         }));
         AutoDispose(this.eventBus.Subscribe<FormUnloadedEvent>(e =>
         {
             if (e.Form == formDefinition)
                 RequestClose();
         }));
-        AutoDispose(new ActionDisposable(() => formDefinition.UpdateCode(Document.Text)));
+        AutoDispose(new ActionDisposable(() => formDefinition?.UpdateCode(Document.Text)));
     }
 
     public CodeEditorViewModel Initialize(FormDefinition formElement)
@@ -110,9 +110,9 @@ public partial class CodeEditorViewModel : BaseEditorWindowViewModel
         }
     }
 
-    public void SaveForm() => projectService.SaveForm(formDefinition, false).ListenErrors();
+    public void SaveForm() => projectService.SaveForm(formDefinition!, false).ListenErrors();
 
-    public void SaveFormAs() => projectService.SaveForm(formDefinition, true).ListenErrors();
+    public void SaveFormAs() => projectService.SaveForm(formDefinition!, true).ListenErrors();
 
     public void ViewCode() => editorService.EditCode(formDefinition);
 

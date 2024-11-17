@@ -6,76 +6,76 @@ namespace AvaloniaVisualBasic.Runtime.Interpreter;
 
 public abstract class VB6Visitor<T> : VB6BaseVisitor<T>
 {
-    public T AsType<T>(Vb6Value value)
+    public TT AsType<TT>(Vb6Value value)
     {
-        if (!TryUnpack(value, out T val))
+        if (!TryUnpack(value, out TT val))
             throw new VBCompileErrorException("Type mismatch");
         return val;
     }
 
-    public List<T> AsType<T>(IReadOnlyList<Vb6Value> indexes)
+    public List<TT> AsType<TT>(IReadOnlyList<Vb6Value> indexes)
     {
-        return indexes.Select(AsType<T>).ToList();
+        return indexes.Select(AsType<TT>).ToList();
     }
 
-    public bool TryUnpack<T>(Vb6Value val, out T tout)
+    public bool TryUnpack<TT>(Vb6Value val, out TT tout)
     {
         tout = default!;
-        if (typeof(T) == typeof(int))
+        if (typeof(TT) == typeof(int))
         {
             if (val.Type == Vb6Value.ValueType.Integer)
             {
-                tout = (T)(object)(int)val.Value!;
+                tout = (TT)(object)(int)val.Value!;
                 return true;
             }
             if (val.Type == Vb6Value.ValueType.String)
             {
                 if (int.TryParse((string?)val.Value ?? "", out var asInt))
                 {
-                    tout = (T)(object)asInt;
+                    tout = (TT)(object)asInt;
                     return true;
                 }
             }
             return false;
         }
-        if (typeof(T) == typeof(bool))
+        if (typeof(TT) == typeof(bool))
         {
             if (val.Type == Vb6Value.ValueType.Boolean)
             {
-                tout = (T)(object)(bool)val.Value!;
+                tout = (TT)(object)(bool)val.Value!;
                 return true;
             }
             return false;
         }
-        if (typeof(T) == typeof(float))
+        if (typeof(TT) == typeof(float))
         {
             if (val.Type == Vb6Value.ValueType.Integer)
             {
-                tout = (T)(object)(float)(int)val.Value!;
+                tout = (TT)(object)(float)(int)val.Value!;
                 return true;
             }
             if (val.Type == Vb6Value.ValueType.Single)
             {
-                tout = (T)(object)(float)val.Value!;
+                tout = (TT)(object)(float)val.Value!;
                 return true;
             }
             return false;
         }
-        if (typeof(T) == typeof(double))
+        if (typeof(TT) == typeof(double))
         {
             if (val.Type == Vb6Value.ValueType.Integer)
             {
-                tout = (T)(object)(double)(int)val.Value!;
+                tout = (TT)(object)(double)(int)val.Value!;
                 return true;
             }
             if (val.Type == Vb6Value.ValueType.Single)
             {
-                tout = (T)(object)(float)val.Value!;
+                tout = (TT)(object)(float)val.Value!;
                 return true;
             }
             if (val.Type == Vb6Value.ValueType.Double)
             {
-                tout = (T)(object)(double)val.Value!;
+                tout = (TT)(object)(double)val.Value!;
                 return true;
             }
             return false;
@@ -84,7 +84,7 @@ public abstract class VB6Visitor<T> : VB6BaseVisitor<T>
         return false;
     }
 
-    public bool TryUnpack<T>(Vb6Value left, Vb6Value right, out T tleft, out T tright)
+    public bool TryUnpack<TT>(Vb6Value left, Vb6Value right, out TT tleft, out TT tright)
     {
         tright = default!;
         return TryUnpack(left, out tleft) && TryUnpack(right, out tright);

@@ -95,7 +95,9 @@ public class ApplicationCommands
     {
         public bool CanExecute(object? parameter) => false;
         public void Execute(object? parameter) { }
+#pragma warning disable CS0067
         public event EventHandler? CanExecuteChanged;
+#pragma warning restore CS0067
     }
 
     private static KeyModifiers GetPlatformCommandKey()

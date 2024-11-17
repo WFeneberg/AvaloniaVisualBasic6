@@ -285,7 +285,7 @@ public partial class ExpressionExecutor : VB6Visitor<Task<object?>>
                 {
                     return array.GetValue(AsType<int>(args));
                 }
-                catch (IndexOutOfRangeException _)
+                catch (IndexOutOfRangeException)
                 {
                     throw new VBRunTimeException(procOrArrayCall, VBStandardError.SubscriptOutOfRange);
                 }
