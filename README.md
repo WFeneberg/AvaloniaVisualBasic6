@@ -22,7 +22,7 @@ You'll generally need [.NET 9.0](https://dotnet.microsoft.com/en-us/download/dot
 To build, simply run:
 
 ```
-dotnet build AvaloniaVisualBasic/AvaloniaVisualBasic.Desktop.csproj
+dotnet build AvaloniaVisualBasic.Desktop/AvaloniaVisualBasic.Desktop.csproj
 ```
 
 If you encounter [Antlr4 errors](https://github.com/BAndysc/AvaloniaVisualBasic6/issues/2), this likely means the `Antlr4BuildTasks` library couldn't automatically download Java. Installing Java manually should resolve the issue.
