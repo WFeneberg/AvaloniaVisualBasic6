@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
 using AvaloniaVisualBasic.Runtime;
 using Classic.Avalonia.Theme;
 using Classic.CommonControls.Dialogs;
@@ -23,6 +24,7 @@ public partial class App : Application
             if (Program.StartupForm != null)
             {
                 VBLoader.RunForm(Program.StartupForm, default, out var window);
+                window.Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AvaloniaVisualBasic.Standalone/form.ico")));
                 desktop.MainWindow = window;
             }
             else
@@ -40,6 +42,7 @@ public partial class App : Application
                 };
                 window.Content = msgBox;
                 desktop.MainWindow = window;
+                window.Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AvaloniaVisualBasic.Standalone/form.ico")));
                 msgBox.AcceptRequest += _ => window.Close();
             }
         }

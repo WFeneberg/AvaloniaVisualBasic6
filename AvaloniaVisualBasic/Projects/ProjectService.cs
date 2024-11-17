@@ -248,6 +248,23 @@ public class ProjectService : IProjectService
 
     public async Task MakeProject(ProjectDefinition projectDefinition)
     {
+        try
+        {
+            await MakeProjectInternal(projectDefinition);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            await windowManager.MessageBox("Fatal error while making the project:\n" + e.Message, icon: MessageBoxIcon.Information);
+            throw;
+        }
+    }
+
+    private async Task MakeProjectInternal(ProjectDefinition projectDefinition)
+    {
         if (OperatingSystem.IsBrowser())
         {
             await windowManager.MessageBox("Can't make project in a browser!", icon: MessageBoxIcon.Information);
@@ -264,26 +281,35 @@ public class ProjectService : IProjectService
         if (exePath == null)
             throw new OperationCanceledException();
 
-        List<FileInfo> requiredNativeFiles;
+        List<FileInfo[]> requiredNativeFiles;
 
         if (OperatingSystem.IsWindows())
         {
             requiredNativeFiles =
             [
-                new FileInfo("standalone/av_libglesv2.dll"),
-                new FileInfo("standalone/AvaloniaVisualBasic.Standalone.exe"),
-                new FileInfo("standalone/libHarfBuzzSharp.dll"),
-                new FileInfo("standalone/libSkiaSharp.dll")
+                [new FileInfo("standalone/av_libglesv2.dll"), new FileInfo("av_libglesv2.dll")],
+                [new FileInfo("standalone/AvaloniaVisualBasic.Standalone.exe")],
+                [new FileInfo("standalone/libHarfBuzzSharp.dll"), new FileInfo("libHarfBuzzSharp.dll")],
+                [new FileInfo("standalone/libSkiaSharp.dll"), new FileInfo("libSkiaSharp.dll")]
             ];
         }
         else if (OperatingSystem.IsMacOS())
         {
             requiredNativeFiles =
             [
-                new FileInfo("standalone/libAvaloniaNative.dylib"),
-                new FileInfo("standalone/AvaloniaVisualBasic.Standalone"),
-                new FileInfo("standalone/libHarfBuzzSharp.dylib"),
-                new FileInfo("standalone/libSkiaSharp.dylib")
+                [new FileInfo("standalone/libAvaloniaNative.dylib"), new FileInfo("libAvaloniaNative.dylib")],
+                [new FileInfo("standalone/AvaloniaVisualBasic.Standalone")],
+                [new FileInfo("standalone/libHarfBuzzSharp.dylib"), new FileInfo("libHarfBuzzSharp.dylib")],
+                [new FileInfo("standalone/libSkiaSharp.dylib"), new FileInfo("libSkiaSharp.dylib")]
+            ];
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            requiredNativeFiles =
+            [
+                [new FileInfo("standalone/AvaloniaVisualBasic.Standalone")],
+                [new FileInfo("standalone/libHarfBuzzSharp.so"), new FileInfo("libHarfBuzzSharp.so")],
+                [new FileInfo("standalone/libSkiaSharp.so"), new FileInfo("libSkiaSharp.so")]
             ];
         }
         else
@@ -292,7 +318,7 @@ public class ProjectService : IProjectService
             throw new OperationCanceledException();
         }
 
-        if (requiredNativeFiles.Any(f => !f.Exists))
+        if (requiredNativeFiles.Any(files => files.All(f => !f.Exists)))
         {
             await windowManager.MessageBox("To Make Project, you need to build standalone runtime first. See the readme for help.", icon: MessageBoxIcon.Information);
             throw new OperationCanceledException();
@@ -322,8 +348,10 @@ public class ProjectService : IProjectService
         ZipFile.CreateFromDirectory(tempPath, Path.ChangeExtension(exePath, "dll")!);
         Directory.Delete(tempPath, true);
 
-        foreach (var standaloneFile in requiredNativeFiles)
+        foreach (var standaloneFile in requiredNativeFiles.Select(f => f.FirstOrDefault(x => x.Exists)))
         {
+            if (standaloneFile == null)
+                throw new Exception($"Required files doesn't exist, even tho it existed few lines above");
             var fileName = standaloneFile.Name;
             if (fileName.StartsWith("AvaloniaVisualBasic.Standalone"))
                 fileName = Path.GetFileName(exePath);

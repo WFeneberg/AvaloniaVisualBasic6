@@ -83,7 +83,9 @@ public class WindowManager : IWindowManager
             {
                 Content = dialog,
                 DataContext = dialog,
-                SizeToContent = SizeToContent.WidthAndHeight
+                SizeToContent = SizeToContent.WidthAndHeight,
+                ShowActivated = true,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
 
             var lifetime = new TaskCompletionSource();
@@ -225,7 +227,9 @@ public class WindowManager : IWindowManager
             {
                 Content = dialog,
                 DataContext = dialog,
-                SizeToContent = SizeToContent.WidthAndHeight
+                SizeToContent = SizeToContent.WidthAndHeight,
+                ShowActivated = true,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             return await window.ShowDialog<bool>(GetTopWindow(desktop));
         }

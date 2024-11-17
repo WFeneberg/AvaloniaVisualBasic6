@@ -10,6 +10,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <DebugSymbols>False</DebugSymbols>
         <DebugType>None</DebugType>
+        <ApplicationIcon>form.ico</ApplicationIcon>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -33,5 +34,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Resources\**\*"/>
+        <None Remove="form.ico" />
+        <AvaloniaResource Include="form.ico" />
     </ItemGroup>
 </Project>

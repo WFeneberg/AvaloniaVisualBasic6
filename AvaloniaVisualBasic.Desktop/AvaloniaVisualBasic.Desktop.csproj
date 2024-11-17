@@ -6,6 +6,7 @@
     <TargetFrameworks>$(DotNetVersionDesktop)</TargetFrameworks>
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationIcon>vb6icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -20,5 +21,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AvaloniaVisualBasic\AvaloniaVisualBasic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="..\AvaloniaVisualBasic\vb6icon.ico">
+      <Link>vb6icon.ico</Link>
+    </AvaloniaResource>
   </ItemGroup>
 </Project>

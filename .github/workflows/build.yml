@@ -1,0 +1,36 @@
+name: Build VB6
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Run Tests
+        run: dotnet test AvaloniaVisualBasic.Runtime.Tests/AvaloniaVisualBasic.Runtime.Tests.csproj
+
+      - name: Build AvaloniaVisualBasic.Desktop (Linux)
+        run: dotnet build AvaloniaVisualBasic.Desktop -f net9.0 -o bin/linux/
+
+      - name: Build AvaloniaVisualBasic.Standalone (Linux)
+        run: dotnet build AvaloniaVisualBasic.Standalone -f net9.0 -o bin/linux/standalone/

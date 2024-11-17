@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="AvaloniaVisualBasic.MainWindow"
         x:DataType="avaloniaVisualBasic:MainViewViewModel"
-        Icon="/Icons/vb6.gif"
+        Icon="/vb6icon.ico"
         ClosingBehavior="OwnerAndChildWindows"
         Title="{CompiledBinding Title}">
     <avaloniaVisualBasic:MainView x:Name="MainView" />

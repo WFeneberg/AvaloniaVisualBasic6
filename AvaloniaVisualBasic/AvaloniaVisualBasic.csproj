@@ -42,5 +42,7 @@
         <None Remove="Icons\**\*.gif"/>
         <AvaloniaResource Include="Icons\**\*.gif"/>
         <AvaloniaResource Include="Resources\**\*"/>
+        <None Remove="vb6icon.ico" />
+        <AvaloniaResource Include="vb6icon.ico" />
     </ItemGroup>
 </Project>

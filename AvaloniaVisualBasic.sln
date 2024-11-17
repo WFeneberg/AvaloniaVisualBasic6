@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "meta", "meta", "{6151C731-2
 		README.md = README.md
 		LICENSE = LICENSE
 		build_cloudflare.sh = build_cloudflare.sh
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\build.yml = .github\workflows\build.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaVisualBasic.Standalone", "AvaloniaVisualBasic.Standalone\AvaloniaVisualBasic.Standalone.csproj", "{0C6BC133-E273-4716-83D1-4FD1B0C14E19}"
